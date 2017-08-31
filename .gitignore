@@ -265,3 +265,4 @@ gradle-app.setting
 !starfarer.api.jar
 !starfarer.api.zip
 !SectorUnit-1.0-SNAPSHOT.jar
+!.travis.yml

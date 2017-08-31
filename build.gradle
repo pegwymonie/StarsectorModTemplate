@@ -1,15 +1,18 @@
-group 'org.modmaker'
-version '1.0'
+def modReportFile;
+def newline = System.getProperty("line.separator");
+def structureMatcher = "**/.structure";
+def startTime = new Date().format('yyyyMMddHH');
+
 def modName='StarSectorMod'
+
+group 'org.modmaker'
+version startTime
 
 apply plugin: 'java'
 
 sourceCompatibility = 1.7
 
-def modReportFile;
-def newline = System.getProperty("line.separator");
-def structureMatcher = "**/.structure";
-def startTime = new Date().format('yyyyMMddHHmmss');
+
 
 repositories {
     mavenCentral()
@@ -25,7 +28,9 @@ task copyData(type: Copy) {
     into 'build/struc/data'
 
     doLast {
-        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        for (File file in files.files){
+            modReportFile.append(file.getPath() + newline)
+        }
         println("Copied: " + files.size() + " data files")
     }
 }
@@ -37,7 +42,9 @@ task copyGraphics(type: Copy) {
     into 'build/struc/graphics'
 
     doLast {
-        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        for (File file in files.files){
+            modReportFile.append(file.getPath() + newline)
+        }
         println("Copied: " + files.size() + " graphic files")
     }
 }
@@ -49,7 +56,9 @@ task copySounds(type: Copy) {
     into 'build/struc/sounds'
 
     doLast {
-        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        for (File file in files.files){
+            modReportFile.append(file.getPath() + newline)
+        }
         println("Copied: " + files.size() + " sound files")
     }
 }
@@ -68,7 +77,9 @@ task copySource(type: Copy){
     into "build/struc/jars/sources/$modName"
 
     doLast {
-        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        for (File file in files.files){
+            modReportFile.append(file.getPath() + newline)
+        }
         println("Copied: " + files.size() + " source files")
     }
 }

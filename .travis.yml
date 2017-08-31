@@ -1,11 +1,17 @@
 language: java
-jdk:
-- oraclejdk7
-- openjdk6
+
+script:
+  - ./gradlew clean build bundleMod createTemplate
+  - ls
+  - ls build
+  - ls build/distributions
+
 deploy:
   provider: releases
   api_key:
     secure: NVSAtDzIlDgkEPvDge5LEzIywVkfYa/HIteQS2DTwvqND/tADLwNdhTU0482p+VwXhBObwq5urc1g/EdmGuDPc6svJ0upb9w6Goxj074y+4QeRRB6CgWYNnyfFhWfA1M5s/jRT5VXbCUoyQfRxtcbUZUZ4aawDJTx+pxA+FmsArwDfNdRg+M/dxazM0sSfr7pW1aKS/izJRTlCN3qYHXIDS8KQHICqwTuZCuU0PQZGCPRUQnCEIJ5CdfR+2GB3sQkHEoLj3Xh6cjYXyDuKeJXaX2nnpKGrF4keNunR4CyYI2S51Pvfu5JNzPa9GFBxHWxQ/Io1VxEYjsYxkYhzh1DiUdL6aQs0BcWrj4LRNx54z0MzusV3+kxJKHCqbH9WENwDH+7Ny7KTAYiCF09hmrG+kbDsXCgYSatcg1GtEEndaokHSiW4K//4kXRph4lWq+NdEVd8RHFOUZCSaR0eXOo0a4SLyEEVbO8TmntCBN7bjCaIBigsOl0ujviW9xBpHOyxWOfFc6/IG5B9FJ42ZBAnaISU6hA13m3tWcungdkMGIzLgAQtSAJ4YMotGKtVmc1N+qkUsnS4F52aWhiWed2OK2TSARHDriMIKy0ejveTLVn1nLigusbmCP3W0+orWZdDJiZs0yHJJ187Jnv+eSLoplWI7EmqgHBMYOTOfl9uo=
-  file: "/StarsectorModTemplate/build/distributions/StarSectorModTemplate-1.0.zip"
+  file_glob: true
+  file: build/distributions/*
+  skip_cleanup: true
   on:
     repo: pegwymonie/StarsectorModTemplate
