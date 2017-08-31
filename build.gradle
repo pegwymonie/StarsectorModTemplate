@@ -1,16 +1,15 @@
-import java.time.Instant
-
 group 'org.modmaker'
 version '1.0'
 def modName='StarSectorMod'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.7
 
 def modReportFile;
 def newline = System.getProperty("line.separator");
 def structureMatcher = "**/.structure";
+def startTime = new Date().format('yyyyMMddHHmmss');
 
 repositories {
     mavenCentral()
@@ -79,7 +78,7 @@ task bundleMod(type: Zip, dependsOn: 'jar') {
 
     doFirst {
         modReportFile = new File("build/modReport.log")
-        modReportFile.append("Starting Mod Report: " + Instant.now() + newline)
+        modReportFile.append("Starting Mod Report" + startTime + newline)
         println(modReportFile)
 
         println("Copying Files")
