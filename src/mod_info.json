@@ -1,0 +1,10 @@
+{
+  "id": "sywtbModder",
+  "name": "So you want to be a Modder",
+  "author": "Hey You!",
+  "version": "0.1A",
+  "description": "Do you want to build a mod?",
+  "gameVersion": "0.82a",
+  "jars": ["jars/StarSectorMod-1.0-SNAPSHOT.jar"],
+  "modPlugin":"org.modmaker.ModMain"
+}

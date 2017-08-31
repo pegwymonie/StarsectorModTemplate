@@ -1,0 +1,133 @@
+import java.time.Instant
+
+group 'org.modmaker'
+version '1.0'
+def modName='StarSectorMod'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+def modReportFile;
+def newline = System.getProperty("line.separator");
+def structureMatcher = "**/.structure";
+
+repositories {
+    mavenCentral()
+}
+
+
+
+
+task copyData(type: Copy) {
+    includeEmptyDirs = true
+    def files = fileTree('src/data').filter(csvRequireLines).filter(jsonRequireContent)
+    from (files).exclude(structureMatcher)
+    into 'build/struc/data'
+
+    doLast {
+        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        println("Copied: " + files.size() + " data files")
+    }
+}
+
+task copyGraphics(type: Copy) {
+    includeEmptyDirs = true
+    def files = fileTree('src/graphics').exclude(structureMatcher)
+    from (files)
+    into 'build/struc/graphics'
+
+    doLast {
+        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        println("Copied: " + files.size() + " graphic files")
+    }
+}
+
+task copySounds(type: Copy) {
+    includeEmptyDirs = true
+    def files = fileTree('src/sounds').exclude(structureMatcher)
+    from (files)
+    into 'build/struc/sounds'
+
+    doLast {
+        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        println("Copied: " + files.size() + " sound files")
+    }
+}
+
+task copyInfo(type: Copy) {
+    from 'src/mod_info.json'
+    into 'build/struc'
+    doLast {
+        modReportFile.append("src/mod_info.json" + newline)
+    }
+}
+
+task copySource(type: Copy){
+    def files = fileTree('src/main')
+    from (files).exclude(structureMatcher)
+    into "build/struc/jars/sources/$modName"
+
+    doLast {
+        files.files.forEach({modReportFile.append(it.getPath() + newline)})
+        println("Copied: " + files.size() + " source files")
+    }
+}
+
+task bundleMod(type: Zip, dependsOn: 'jar') {
+    baseName = modName
+
+    doFirst {
+        modReportFile = new File("build/modReport.log")
+        modReportFile.append("Starting Mod Report: " + Instant.now() + newline)
+        println(modReportFile)
+
+        println("Copying Files")
+        tasks.copyData.execute()
+        tasks.copyGraphics.execute()
+        tasks.copySounds.execute()
+        tasks.copySource.execute()
+        tasks.copyInfo.execute()
+        println("Finished Copying files")
+    }
+
+
+    def dataFiles = fileTree("build/struc")
+
+    from (dataFiles){
+        into ("$modName/")
+    }
+    from (tasks.jar.archivePath) {
+        into ("$modName/jars")
+    }
+}
+
+
+task createTemplate(type: Zip, dependsOn: 'jar') {
+    baseName = modName + "Template"
+    def files = fileTree(dir: ".", excludes: ["**/*.lock", ".idea", ".gradle", "build"])
+    from files
+}
+
+
+dependencies {
+    compile fileTree(dir: 'libs/comp', include: ['*.jar'])
+    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.2'
+    compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3'
+    compile group: 'org.lwjgl.lwjgl', name: 'lwjgl_util', version: '2.9.3'
+    compile group: 'log4j', name: 'log4j', version: '1.2.9'
+    compile group: 'org.json', name: 'json', version: '20170516'
+    compile group: 'net.java.jinput', name: 'jinput', version: '2.0.7'
+    compile group: 'org.codehaus.janino', name: 'janino', version: '3.0.7'
+
+    testCompile fileTree(dir: 'libs/test', include: ['*.jar'])
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+Spec<? super File> getCsvRequireLines() {
+    return {it.readLines().size() > 1}
+}
+
+Spec<? super File> getJsonRequireContent() {
+    return { (it.readLines().get(0) != "{}") }
+}
