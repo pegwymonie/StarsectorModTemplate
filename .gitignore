@@ -261,3 +261,7 @@ gradle-app.setting
 # gradle/wrapper/gradle-wrapper.properties
 
 /.idea/
+
+!starfarer.api.jar
+!starfarer.api.zip
+!SectorUnit-1.0-SNAPSHOT.jar
