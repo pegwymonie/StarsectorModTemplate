@@ -12,14 +12,9 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.7
 
-
-
 repositories {
     mavenCentral()
 }
-
-
-
 
 task copyData(type: Copy) {
     includeEmptyDirs = true
@@ -138,6 +133,39 @@ Spec<? super File> getCsvRequireLines() {
     return {it.readLines().size() > 1}
 }
 
-Spec<? super File> getJsonRequireContent() {
+static Spec<? super File> getJsonRequireContent() {
     return { (it.readLines().get(0) != "{}") }
+}
+
+task reInit() {
+    def newpackage = project.getGroup();
+    def newModName = modName;
+
+    doFirst{
+        ant.input(message: '> Please enter your package (IE org.myhandle.myawesomemod): ', addproperty: 'newpackage')
+        ant.input(message: '> Please enter your modName (IE MyAwesomeMod): ', addproperty: 'newModName')
+        newpackage = ant.newpackage
+        newModName = ant.newModName
+    }
+
+    doLast{
+        String oldGroup = project.getGroup();
+        String existingMain = "src/main/java/" + oldGroup.replace(".", "/")
+        String newMain      = "src/main/java/" + newpackage.replace(".", "/")
+        String existingTest = "src/test/java/" + oldGroup.replace(".", "/")
+        String newTest      = "src/test/java/" + newpackage.replace(".", "/")
+
+        try{
+          ant.move(file: existingMain , tofile: newMain)
+          ant.move(file: existingTest , tofile: newTest)
+        } catch (Exception e){
+          print("unable to move java files");
+        }
+
+        File buildFile = new File('build.gradle');
+        String newContent = buildFile.getText('UTF-8')
+            .replace("group 'org.something'","group '$newpackage'" )
+            .replace("def modName='somemod'", "def modName='$newModName'")
+        buildFile.write(newContent);
+    }
 }
