@@ -3,8 +3,6 @@ def newline = System.getProperty("line.separator");
 def structureMatcher = "**/.structure";
 def startTime = new Date().format('yyyyMMddHH');
 
-def modName='StarSectorMod'
-
 group 'org.modmaker'
 version startTime
 
@@ -13,159 +11,177 @@ apply plugin: 'java'
 sourceCompatibility = 1.7
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 task copyData(type: Copy) {
-    includeEmptyDirs = true
-    def files = fileTree('src/data').filter(csvRequireLines).filter(jsonRequireContent)
-    from (files).exclude(structureMatcher)
-    into 'build/struc/data'
+  includeEmptyDirs = true
+  def files = fileTree('src/data').filter(csvRequireLines).filter(jsonRequireContent)
+  from(files).exclude(structureMatcher)
+  into 'build/struc/data'
 
-    doLast {
-        for (File file in files.files){
-            modReportFile.append(file.getPath() + newline)
-        }
-        println("Copied: " + files.size() + " data files")
+  doLast {
+    for (File file in files.files) {
+      modReportFile.append(file.getPath() + newline)
     }
+    println("Copied: " + files.size() + " data files")
+  }
 }
 
 task copyGraphics(type: Copy) {
-    includeEmptyDirs = true
-    def files = fileTree('src/graphics').exclude(structureMatcher)
-    from (files)
-    into 'build/struc/graphics'
+  includeEmptyDirs = true
+  def files = fileTree('src/graphics').exclude(structureMatcher)
+  from(files)
+  into 'build/struc/graphics'
 
-    doLast {
-        for (File file in files.files){
-            modReportFile.append(file.getPath() + newline)
-        }
-        println("Copied: " + files.size() + " graphic files")
+  doLast {
+    for (File file in files.files) {
+      modReportFile.append(file.getPath() + newline)
     }
+    println("Copied: " + files.size() + " graphic files")
+  }
 }
 
 task copySounds(type: Copy) {
-    includeEmptyDirs = true
-    def files = fileTree('src/sounds').exclude(structureMatcher)
-    from (files)
-    into 'build/struc/sounds'
+  includeEmptyDirs = true
+  def files = fileTree('src/sounds').exclude(structureMatcher)
+  from(files)
+  into 'build/struc/sounds'
 
-    doLast {
-        for (File file in files.files){
-            modReportFile.append(file.getPath() + newline)
-        }
-        println("Copied: " + files.size() + " sound files")
+  doLast {
+    for (File file in files.files) {
+      modReportFile.append(file.getPath() + newline)
     }
+    println("Copied: " + files.size() + " sound files")
+  }
 }
 
 task copyInfo(type: Copy) {
-    from 'src/mod_info.json'
-    into 'build/struc'
-    doLast {
-        modReportFile.append("src/mod_info.json" + newline)
-    }
+  from 'src/mod_info.json'
+  into 'build/struc'
+  doLast {
+    modReportFile.append("src/mod_info.json" + newline)
+  }
 }
 
-task copySource(type: Copy){
-    def files = fileTree('src/main')
-    from (files).exclude(structureMatcher)
-    into "build/struc/jars/sources/$modName"
+task copySource(type: Copy) {
+  def files = fileTree('src/main')
+  from(files).exclude(structureMatcher)
+  into "build/struc/jars/sources/$project.name"
 
-    doLast {
-        for (File file in files.files){
-            modReportFile.append(file.getPath() + newline)
-        }
-        println("Copied: " + files.size() + " source files")
+  doLast {
+    for (File file in files.files) {
+      modReportFile.append(file.getPath() + newline)
     }
+    println("Copied: " + files.size() + " source files")
+  }
+}
+
+jar{
+  version = ""
+  archivesBaseName = project.getName()
 }
 
 task bundleMod(type: Zip, dependsOn: 'jar') {
-    baseName = modName
+  baseName = project.getName()
 
-    doFirst {
-        modReportFile = new File("build/modReport.log")
-        modReportFile.append("Starting Mod Report" + startTime + newline)
-        println(modReportFile)
+  doFirst {
+    modReportFile = new File("build/modReport.log")
+    modReportFile.append("Starting Mod Report" + startTime + newline)
+    println(modReportFile)
 
-        println("Copying Files")
-        tasks.copyData.execute()
-        tasks.copyGraphics.execute()
-        tasks.copySounds.execute()
-        tasks.copySource.execute()
-        tasks.copyInfo.execute()
-        println("Finished Copying files")
-    }
+    println("Copying Files")
+    tasks.copyData.execute()
+    tasks.copyGraphics.execute()
+    tasks.copySounds.execute()
+    tasks.copySource.execute()
+    tasks.copyInfo.execute()
+    println("Finished Copying files")
+  }
 
 
-    def dataFiles = fileTree("build/struc")
+  def dataFiles = fileTree("build/struc")
 
-    from (dataFiles){
-        into ("$modName/")
-    }
-    from (tasks.jar.archivePath) {
-        into ("$modName/jars")
-    }
+  from(dataFiles) {
+    into("$project.name/")
+  }
+  from(tasks.jar.archivePath) {
+    into("$project.name/jars")
+  }
 }
 
 
 task createTemplate(type: Zip, dependsOn: 'jar') {
-    baseName = modName + "Template"
-    def files = fileTree(dir: ".", excludes: ["**/*.lock", ".idea", ".gradle", "build", ".travis.yml"])
-    from files
+  baseName = project.getName() + "Template"
+  def files = fileTree(dir: ".", excludes: ["**/*.lock", ".idea", ".gradle", "build", ".travis.yml"])
+  from files
 }
 
 
 dependencies {
-    compile fileTree(dir: 'libs/comp', include: ['*.jar'])
-    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.2'
-    compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3'
-    compile group: 'org.lwjgl.lwjgl', name: 'lwjgl_util', version: '2.9.3'
-    compile group: 'log4j', name: 'log4j', version: '1.2.9'
-    compile group: 'org.json', name: 'json', version: '20170516'
-    compile group: 'net.java.jinput', name: 'jinput', version: '2.0.7'
-    compile group: 'org.codehaus.janino', name: 'janino', version: '3.0.7'
+  compile fileTree(dir: 'libs/comp', include: ['*.jar'])
+  compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.2'
+  compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3'
+  compile group: 'org.lwjgl.lwjgl', name: 'lwjgl_util', version: '2.9.3'
+  compile group: 'log4j', name: 'log4j', version: '1.2.9'
+  compile group: 'org.json', name: 'json', version: '20170516'
+  compile group: 'net.java.jinput', name: 'jinput', version: '2.0.7'
+  compile group: 'org.codehaus.janino', name: 'janino', version: '3.0.7'
 
-    testCompile fileTree(dir: 'libs/test', include: ['*.jar'])
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+  testCompile fileTree(dir: 'libs/test', include: ['*.jar'])
+  testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 Spec<? super File> getCsvRequireLines() {
-    return {it.readLines().size() > 1}
+  return { it.readLines().size() > 1 }
 }
 
 static Spec<? super File> getJsonRequireContent() {
-    return { (it.readLines().get(0) != "{}") }
+  return { (it.readLines().get(0) != "{}") }
 }
 
 task reInit() {
-    def newpackage = project.getGroup();
-    def newModName = modName;
+  String newpackage = project.getGroup()
+  String newModName = project.getName()
+  String oldGroup = project.getGroup()
+  String oldModName = project.getName()
 
-    doFirst{
-        ant.input(message: '> Please enter your package (IE org.myhandle.myawesomemod): ', addproperty: 'newpackage')
-        ant.input(message: '> Please enter your modName (IE MyAwesomeMod): ', addproperty: 'newModName')
-        newpackage = ant.newpackage
-        newModName = ant.newModName
+  doFirst {
+    ant.input(message: '> Please enter your package (IE org.myhandle.myawesomemod): ', addproperty: 'newpackage')
+    ant.input(message: '> Please enter your modName (IE MyAwesomeMod): ', addproperty: 'newModName')
+    newpackage = ant.newpackage
+    newModName = ant.newModName
+  }
+
+  doLast {
+    String existingMain = "src/main/java/" + oldGroup.replace(".", "/")
+    String newMain = "src/main/java/" + newpackage.replace(".", "/")
+    String existingTest = "src/test/java/" + oldGroup.replace(".", "/")
+    String newTest = "src/test/java/" + newpackage.replace(".", "/")
+
+    try {
+      ant.move(file: existingMain, tofile: newMain)
+      ant.move(file: existingTest, tofile: newTest)
+    } catch (Exception e) {
+      print("unable to move java files");
     }
 
-    doLast{
-        String oldGroup = project.getGroup();
-        String existingMain = "src/main/java/" + oldGroup.replace(".", "/")
-        String newMain      = "src/main/java/" + newpackage.replace(".", "/")
-        String existingTest = "src/test/java/" + oldGroup.replace(".", "/")
-        String newTest      = "src/test/java/" + newpackage.replace(".", "/")
+    File buildFile = new File('build.gradle')
+    String newContent = buildFile.getText('UTF-8')
+        .replace(oldGroup, newpackage)
+        .replace(oldModName, newModName)
+    buildFile.write(newContent)
 
-        try{
-          ant.move(file: existingMain , tofile: newMain)
-          ant.move(file: existingTest , tofile: newTest)
-        } catch (Exception e){
-          print("unable to move java files");
-        }
+    File settingFile = new File('settings.gradle')
+    String newSettingContent = settingFile.getText('UTF-8')
+        .replace(oldGroup, newpackage)
+        .replace(oldModName, newModName)
+    settingFile.write(newSettingContent)
 
-        File buildFile = new File('build.gradle');
-        String newContent = buildFile.getText('UTF-8')
-            .replace("group 'org.something'","group '$newpackage'" )
-            .replace("def modName='somemod'", "def modName='$newModName'")
-        buildFile.write(newContent);
-    }
+    File modFile = new File('src/mod_info.json')
+    String newModInfoContent = modFile.getText('UTF-8')
+        .replace(oldGroup, newpackage)
+        .replace(oldModName, newModName)
+    modFile.write(newModInfoContent)
+  }
 }
