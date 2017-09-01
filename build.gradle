@@ -110,7 +110,7 @@ task bundleMod(type: Zip, dependsOn: 'jar') {
 
 task createTemplate(type: Zip, dependsOn: 'jar') {
     baseName = modName + "Template"
-    def files = fileTree(dir: ".", excludes: ["**/*.lock", ".idea", ".gradle", "build"])
+    def files = fileTree(dir: ".", excludes: ["**/*.lock", ".idea", ".gradle", "build", ".travis.yml"])
     from files
 }
 

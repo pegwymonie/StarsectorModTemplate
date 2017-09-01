@@ -2,9 +2,6 @@ language: java
 
 script:
   - ./gradlew clean build bundleMod createTemplate
-  - ls
-  - ls build
-  - ls build/distributions
 
 deploy:
   provider: releases
