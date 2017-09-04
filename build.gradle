@@ -13,11 +13,11 @@ sourceCompatibility = 1.7
 repositories {
   mavenCentral()
 }
-
 task copyData(type: Copy) {
-  includeEmptyDirs = true
-  def files = fileTree('src/data').filter(csvRequireLines).filter(jsonRequireContent)
-  from(files).exclude(structureMatcher)
+  includeEmptyDirs = false
+  FileTree files = fileTree('src/data')
+          .matching {it.exclude(structureFiles); it.exclude(emptyCsvFiles); it.exclude(emptyJsonFiles) }
+  from(files)
   into 'build/struc/data'
 
   doLast {
@@ -29,8 +29,9 @@ task copyData(type: Copy) {
 }
 
 task copyGraphics(type: Copy) {
-  includeEmptyDirs = true
-  def files = fileTree('src/graphics').exclude(structureMatcher)
+  includeEmptyDirs = false
+  def files = fileTree('src/graphics')
+          .matching {it.exclude(structureFiles)}
   from(files)
   into 'build/struc/graphics'
 
@@ -43,8 +44,9 @@ task copyGraphics(type: Copy) {
 }
 
 task copySounds(type: Copy) {
-  includeEmptyDirs = true
-  def files = fileTree('src/sounds').exclude(structureMatcher)
+  includeEmptyDirs = false
+  def files = fileTree('src/sounds')
+          .matching {it.exclude(structureFiles)}
   from(files)
   into 'build/struc/sounds'
 
@@ -66,7 +68,8 @@ task copyInfo(type: Copy) {
 
 task copySource(type: Copy) {
   def files = fileTree('src/main')
-  from(files).exclude(structureMatcher)
+          .matching {it.exclude(structureFiles)}
+  from(files)
   into "build/struc/jars/sources/$project.name"
 
   doLast {
@@ -132,13 +135,18 @@ dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-Spec<? super File> getCsvRequireLines() {
-  return { it.readLines().size() > 1 }
+static Spec<FileTreeElement> getEmptyCsvFiles() {
+  return { it.isDirectory() ? false : it.getFile().readLines().size() <= 1 }
 }
 
-static Spec<? super File> getJsonRequireContent() {
-  return { (it.readLines().get(0) != "{}") }
+static Spec<FileTreeElement> getEmptyJsonFiles() {
+  return { it.isDirectory() ? false : it.getFile().readLines().get(0) == "{}" }
 }
+
+static Spec<FileTreeElement> getStructureFiles() {
+  return { (it.getName().matches(".structure")) }
+}
+
 
 task reInit() {
   String newpackage = project.getGroup()
